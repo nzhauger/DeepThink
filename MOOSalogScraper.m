@@ -9,38 +9,34 @@ alog = readlines('newfile.alog');
 alog = splitlines(alog);
 
 N = length(alog);
+alog = alog(5:N);
+N = length(alog);
 
 time = zeros(N,1);
-xline = zeros(N, 1); i=1;
-yline = zeros(N, 1); j=1;
-zline = zeros(N, 1); z=1;
-
-
-for k = 5:N
-    alog(k) = erase(alog(k),'uSimMarine');
-end
+xval = zeros(N,1);
+yval = zeros(N,1);
+zval = zeros(N,1);
 
 for k = 1:N
+    alog(k) = erase(alog(k),'uSimMarine');
+    alog(k) = erase(alog(k),' ');
     if contains(alog(k),'NAV_X')
-        xline(i) = alog(k);
-        i=i+1;
+        time(k) = extractBefore(alog(k),'NAV_X');
+        xval(k:N) = extractAfter(alog(k),'NAV_X');
     elseif contains(alog(k),'NAV_Y')
-        yline(j) = alog(k);
-        j = j+1;
+        time(k) = extractBefore(alog(k),'NAV_Y');
+        yval(k:N) = extractAfter(alog(k),'NAV_Y');
     elseif contains(alog(k),'NAV_Z')
-        zline(z) = alog(k);
-        z = z+1;
+        time(k) = extractBefore(alog(k),'NAV_Z');
+        zval(k:N) = extractAfter(alog(k),'NAV_Z');
     end
+end
 
-    % produces a NaN for each non NAV_K line
-    % NAV_X(k) = extractAfter(alog(k), "X                uSimMarine      ");
-    % NAV_Y(k) = extractAfter(alog(k), "Y                uSimMarine      ");
-    % NAV_Z(k) = extractAfter(alog(k), "Z                uSimMarine      ");
-    
-    % did not work, elements did not match on both sides
-    % NAV_X(k) = extractBetween(alog(k), 'NAV_X                uSimMarine      ', ' ');
-    % NAV_Y(k) = extractBetween(alog(k), 'NAV_Y                uSimMarine      ', ' ');
-    % NAV_Z(k) = extractBetween(alog(k), 'NAV_Z                uSimMarine      ', ' ');
-
+%trying to plot this 
+for i = 1:N
+    hold on;
+    plot3(xval(i),yval(i),zval(i),'*')
+    hold off;
+    getframe;
 end
 
