@@ -33,10 +33,25 @@ for k = 1:N
 end
 
 %trying to plot this 
-for i = 1:N
-    hold on;
-    plot3(xval(i),yval(i),zval(i),'*')
-    hold off;
-    getframe;
-end
 
+AUV_trail = plot3([xval(1) xval(2)],[yval(1) yval(2)],[zval(1) zval(2)],'--'); 
+shipbody_x = [-1, 0 1 -1];
+shipbody_y = [0, -1 0 0];
+shipbody_z = [0, 0, 0, 0];
+s = hgtransform;
+patch('XData', shipbody_x, 'YData', shipbody_y, 'ZData', shipbody_z, 'Parent',s)
+
+for i = 1:N-1
+    hold on;
+    %plot3(xval(i),yval(i),zval(i),'*')
+    s.Matrix = makehgtform('translate', [xval(i+1) yval(i+1) zval(i+1)]);
+    set(AUV_trail, 'XData',xval(1:i))
+    set(AUV_trail, 'YData',yval(1:i))
+    set(AUV_trail, 'ZData',zval(1:i))
+    xlim([-100 100])
+    ylim([-100 100])
+    zlim([-100 10])
+    xlabel('X position (m)'); ylabel('Y position (m)'); zlabel('Depth (m)');
+    %hold off;
+    drawnow;
+end
