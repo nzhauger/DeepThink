@@ -1,0 +1,58 @@
+% function [latval,longval, depthval, pitchval, yawval, headingval, N] = MOOSalogScraper2()
+% Tan Nguyen 28 Jan 2025
+% Nick Hauger 28 Jan 2025
+% this one works
+%Modified to extract long & lat
+%modified top of function to ex
+
+clear variables; clc; close all;
+
+alog = readlines('full.alog');
+alog = splitlines(alog);
+
+N = length(alog);
+alog = alog(5:N);
+N = length(alog);
+
+time = zeros(N,1);
+latval = zeros(N,1);
+longval = zeros(N,1);
+headingval = zeros(N,1);
+yawval = zeros(N,1);
+depthval = zeros(N,1);
+
+for k = 1:N
+    alog(k) = erase(alog(k),'uSimMarine');
+    alog(k) = erase(alog(k),' ');
+    if contains(alog(k),'NAV_LONG')
+        time(k) = extractBefore(alog(k),'NAV_LONG');
+        longval(k:N) = extractAfter(alog(k),'NAV_LONG');
+    elseif contains(alog(k),'NAV_LAT')
+        time(k) = extractBefore(alog(k),'NAV_LAT');
+        latval(k:N) = extractAfter(alog(k),'NAV_LAT');
+    elseif contains(alog(k),'NAV_DEPTH')
+        time(k) = extractBefore(alog(k),'NAV_DEPTH');
+        depthval(k:N) = extractAfter(alog(k),'NAV_DEPTH');
+    elseif contains(alog(k),'NAV_PITCH')
+        time(k) = extractBefore(alog(k),'NAV_PITCH');
+        pitchval(k:N) = extractAfter(alog(k),'NAV_PITCH');
+    elseif contains(alog(k),'NAV_YAW')
+        time(k) = extractBefore(alog(k),'NAV_YAW');
+        yawval(k:N) = extractAfter(alog(k),'NAV_YAW');
+    elseif contains(alog(k),'NAV_HEADING')
+        time(k) = extractBefore(alog(k),'NAV_HEADING');
+        headingval(k:N) = extractAfter(alog(k),'NAV_HEADING');  
+    end
+
+end
+
+min(nonzeros(latval));
+max(nonzeros(latval));
+
+min(nonzeros(latval));
+min(nonzeros(longval));
+
+depthval(30000)
+
+% longval2 = nonzeros(longval);
+% latval2 = nonzeros(latval);
