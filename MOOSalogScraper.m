@@ -1,5 +1,7 @@
+function [xval,yval,zval,N] = MOOSalogScraper()
 % Tan Nguyen 28 Jan 2025
 % Nick Hauger 28 Jan 2025
+% this one works
 
 clear variables; clc; close all;
 
@@ -31,23 +33,24 @@ for k = 1:N
 end
 
 %trying to plot this 
-figure(1);
-hold on;
-axis([-150 100 -150 100])
-AUV_trail = plot3([xval(1) xval(2)],[yval(1) yval(2)],[zval(1) zval(2)],'--'); 
-shipbody_x = [-1, 0 1 -1];
-shipbody_y = [0, -1 0 0];
-shipbody_z = [0, 0, 0, 0];
-s = hgtransform;
-patch('XData', shipbody_x, 'YData', shipbody_y, 'ZData', shipbody_z, 'Parent',s)
+% figure(1);
+% hold on;
+% axis([-150 100 -150 100])
+% AUV_trail = plot3([xval(1) xval(2)],[yval(1) yval(2)],[zval(1) zval(2)],'--'); 
+% shipbody_x = [-1, 0 1 -1];
+% shipbody_y = [0, -1 0 0];
+% shipbody_z = [0, 0, 0, 0];
+% s = hgtransform;
+% patch('XData', shipbody_x, 'YData', shipbody_y, 'ZData', shipbody_z, 'Parent',s)
+% 
+% for i = 1:N-1
+%     %plot3(xval(i),yval(i),zval(i),'*')
+%     s.Matrix = makehgtform('translate', [xval(i+1) yval(i+1) zval(i+1)]);
+%     set(AUV_trail, 'XData',xval(1:i))
+%     set(AUV_trail, 'YData',yval(1:i))
+%     set(AUV_trail, 'ZData',zval(1:i))
+%     xlabel('X position (m)'); ylabel('Y position (m)'); zlabel('Depth (m)');
+%     %hold off;
+%     drawnow;
+% end
 
-for i = 1:N-1
-    %plot3(xval(i),yval(i),zval(i),'*')
-    s.Matrix = makehgtform('translate', [xval(i+1) yval(i+1) zval(i+1)]);
-    set(AUV_trail, 'XData',xval(1:i))
-    set(AUV_trail, 'YData',yval(1:i))
-    set(AUV_trail, 'ZData',zval(1:i))
-    xlabel('X position (m)'); ylabel('Y position (m)'); zlabel('Depth (m)');
-    %hold off;
-    drawnow;
-end
