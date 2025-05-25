@@ -1,4 +1,3 @@
-clc;clear;close all;
 %% --- Load MOOS Data ---
 [x,y,lat,long,depth,heading,N] = MOOSalogScraper();
 
@@ -17,13 +16,35 @@ buoy_x = [72 71 69 68 69 71];
 buoy_y = [-52 -50 -50 -52 -54 -54];
 buoy_pos = [70, -52]; % buoy center
 
+%obstacle info
+ob_0_x = [107 112 112 107 100 95 95 100];
+ob_0_y = [-101 -106 -113 -118 -118 -113 -106 -101];
+
+ob_1_x = [50 53 53 50 45 41 41 45];
+ob_1_y = [-30 -33 -38 -42 -42 -38 -33 -30];
+
+ob_2_x = [82 87 87 82 76 71 71 76];
+ob_2_y = [-65 -70 -76 -81 -81 -76 -70 -65];
+
+ob_3_x = [59 64 64 59 53 48 48 53];
+ob_3_y = [-101 -105 -112 -116 -116 -112 -105 -101];
+
+ob_4_x = [107 112 112 107 100 96 96 100];
+ob_4_y = [-38 -43 -49 -54 -54 -49 -43 -38];
+% I suppose I could have turned this into a matrix, but I'm lazy
+
 % --- Create Main Figure ---
-figure('Position', [100, 100, 1600, 800]);
+figure('Position', [50, 50, 1650, 800]);
 %% --- Subplot 1: AUV Position ---
 ax1 = subplot(1,3,1);
 s = hgtransform;
 AUVpatch = patch(ax1,'XData', xpatch, 'YData', ypatch, 'Parent', s, 'FaceColor', 'b');
-buoypatch = patch(ax1, 'XData', buoy_x, 'YData', buoy_y, 'FaceColor', 'r', 'EdgeColor', 'k');
+buoypatch = patch(ax1, 'XData', buoy_x, 'YData', buoy_y, 'FaceColor', 'y', 'EdgeColor', 'k');
+ob0patch = patch(ax1, 'XData', ob_0_x, 'YData', ob_0_y, 'FaceColor', 'w', 'EdgeColor', 'k');
+ob1patch = patch(ax1, 'XData', ob_1_x, 'YData', ob_1_y, 'FaceColor', 'w', 'EdgeColor', 'k');
+ob2patch = patch(ax1, 'XData', ob_2_x, 'YData', ob_2_y, 'FaceColor', 'w', 'EdgeColor', 'k');
+ob3patch = patch(ax1, 'XData', ob_3_x, 'YData', ob_3_y, 'FaceColor', 'w', 'EdgeColor', 'k');
+ob4patch = patch(ax1, 'XData', ob_4_x, 'YData', ob_4_y, 'FaceColor', 'w', 'EdgeColor', 'k');
 
 axis equal;
 axis([(min(x) - 10) (max(x) + 10) (min(y) - 10) (max(y) + 10)]);
@@ -152,15 +173,23 @@ for k = 1:N-2
     
     set(AUVpatch, 'XData', xrot + x(k), 'YData', yrot + y(k))
 %% 2. Update Buoy & AR tag -----
+    x_e = buoy_pos(1) - x(k); y_e = buoy_pos(2) - y(k);
+    heading_des = atan2d(y_e, x_e);
+    if heading_des - thetaAUV > 180, heading_des = heading_des - 360;
+    elseif heading_des - thetaAUV < -180, heading_des = heading_des + 360; end
+    theta_e = heading_des - thetaAUV;
+
     dist_to_buoy = sqrt((buoy_pos(1) - x(k))^2 + (buoy_pos(2) - y(k))^2);
     vec_to_buoy = buoy_pos - [x(k), y(k)];
     heading_vec = [cosd(heading(k)), sind(heading(k))];
-    % I don't think angle diff is working as intended. 
+    % I don't think angle_diff is working as intended. 
     % Is the equation correct?
-    angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
-    show_camera = (dist_to_buoy < 20) && (abs(angle_diff) < 60) && (depth(k) < 5);
+    %angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
+    %show_camera = (dist_to_buoy < 20) && (abs(angle_diff) < 60) && (depth(k) < 5);
+    show_camera = (dist_to_buoy < 40) && (abs(theta_e) < 60) && (depth(k) < 5);
     if show_camera
-        cam_offset = dist_to_buoy * tand(-angle_diff);
+        %cam_offset = dist_to_buoy * tand(-angle_diff);
+        cam_offset = dist_to_buoy * tand(-theta_e);
         vw = 2 * dist_to_buoy * sind(55);
         xmax = vw / 2; xmin = -xmax;
         ymax = (1.85)*xmax+2; ymin = -ymax+4;
@@ -288,7 +317,7 @@ while dist_to_buoy > 2.5
     heading_vec = [90 - cosd(heading_uni(2)), 90 - sind(heading_uni(2))];
     angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
     %show_camera = (dist_to_buoy < 20) && (abs(angle_diff) < 60);
-    show_camera = (dist_to_buoy < 20) && (abs(theta_e(2)) < 60);
+    show_camera = (dist_to_buoy < 40) && (abs(theta_e(2)) < 60);
     if show_camera
         %cam_offset = dist_to_buoy * tand(-angle_diff);
         cam_offset = dist_to_buoy * tand(-theta_e(2));
@@ -311,4 +340,3 @@ while dist_to_buoy > 2.5
     u(1) = u(2);
 
 end
-
