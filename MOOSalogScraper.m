@@ -1,4 +1,4 @@
-function [lat,long,depth,heading,N] = MOOSalogScraper()
+function [x,y,lat,long,depth,heading,N] = MOOSalogScraper()
 % Tan Nguyen 28 Jan 2025
 % Nick Hauger 23 MAY 2025
 % this one works
@@ -17,6 +17,8 @@ lat = zeros(N,1);
 long = zeros(N,1);
 depth = zeros(N,1);
 heading = zeros(N,1);
+x = zeros(N,1);
+y = zeros(N,1);
 
 %creating vectors of the individual log files
 latlog = readlines('nav_lat.alog');
@@ -27,6 +29,10 @@ depthlog = readlines('nav_depth.alog');
 depthlog = splitlines(depthlog);
 hdglog = readlines('nav_heading.alog');
 hdglog = splitlines(hdglog);
+xlog = readlines('nav_x.alog');
+xlog = splitlines(xlog);
+ylog = readlines('nav_y.alog');
+ylog = splitlines(ylog);
 
 %grabbing values
 for k = 1:N-1
@@ -35,6 +41,8 @@ for k = 1:N-1
     long(k) = extractAfter(longlog(k),'NAV_LONG,');
     depth(k) = extractAfter(depthlog(k),'NAV_DEPTH,');
     heading(k) = extractAfter(hdglog(k),'NAV_HEADING,');
+    x(k) = extractAfter(xlog(k),'NAV_X,');
+    y(k) = extractAfter(ylog(k),'NAV_Y,');
 end
 
 %lat_deg_per_meter = 1 / 111000;             % Approximate
