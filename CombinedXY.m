@@ -19,16 +19,12 @@ buoy_pos = [70, -52]; % buoy center
 %obstacle info
 ob_0_x = [107 112 112 107 100 95 95 100];
 ob_0_y = [-101 -106 -113 -118 -118 -113 -106 -101];
-
 ob_1_x = [50 53 53 50 45 41 41 45];
 ob_1_y = [-30 -33 -38 -42 -42 -38 -33 -30];
-
 ob_2_x = [82 87 87 82 76 71 71 76];
 ob_2_y = [-65 -70 -76 -81 -81 -76 -70 -65];
-
 ob_3_x = [59 64 64 59 53 48 48 53];
 ob_3_y = [-101 -105 -112 -116 -116 -112 -105 -101];
-
 ob_4_x = [107 112 112 107 100 96 96 100];
 ob_4_y = [-38 -43 -49 -54 -54 -49 -43 -38];
 % I suppose I could have turned this into a matrix, but I'm lazy
@@ -56,14 +52,8 @@ ylabel('Y');
     %% --- Subplot 2: Buoy and AR Tag View ---
 ax2 = subplot(1,3,2);
 hold(ax2, 'on');
-theta = 55; % has to do with where the sub is looking
-d = 100: -0.2: 5; % distance to buoy. Shouldn't this be based on distance to final point?
-%d_off = 100;
 
-%phi = -30;
-phi = heading(1);
-
-dist_to_buoy = sqrt((buoy_pos(1) - x(1))^2 + (buoy_pos(2) - y(1))^2); %analogous to d_off
+dist_to_buoy = sqrt((buoy_pos(1) - x(1))^2 + (buoy_pos(2) - y(1))^2); 
 vec_to_buoy = buoy_pos - [x(1), y(1)];
 heading_vec = [cosd(heading(1)), sind(heading(1))];
 angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
@@ -80,9 +70,22 @@ artag2 = image(ax2, 'CData', flipud(artag), 'XData', ar_pos, 'YData', [1, 2]);
 % Buoy rectangles
 rect1 = rectangle(ax2, 'Position', [-0.75, 0, 1.5, 3] + offset_arr);
 rect2 = rectangle(ax2, 'Position', [-2, -1, 4, 1] + offset_arr);
+
+% Cleat left leg rectangle
+legL =rectangle('Position', [-0.25, 0.0, 0.1, 1.2], 'FaceColor', [0.8 0.8 0.8]);  
+
+% Cleat right leg rectangle
+legR = rectangle('Position', [0.125, 0.0, 0.1, 1.2], 'FaceColor', [0.8 0.8 0.8]);
+
+% Cleat top rectangle
+topRect = rectangle('Position', [-0.5, 1, 1, 0.4], 'FaceColor', 'k'); 
+
+uistack(topRect,'up', 1);
 set(rect1, 'Visible','off');
 set(rect2, 'Visible','off');
-set(artag2,   'Visible','off');
+set(legL, 'Visible','off');
+set(legR, 'Visible','off');
+set(topRect, 'Visible','off');
 
 title('Buoy and AR Tag View');
 xlabel('X');
@@ -151,7 +154,7 @@ depth_patch = rectangle('Position', ...
     'FaceColor', 'y', 'EdgeColor', 'k', 'Curvature', [0.3 0.3]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% --- Animation Loop (Synchronizing Both) ---
+%% --- Animation Loop ---
 
 for k = 1:N-2
     %axes(ax1); %you dont need this if you specify patch is inside ax1
@@ -182,10 +185,7 @@ for k = 1:N-2
     dist_to_buoy = sqrt((buoy_pos(1) - x(k))^2 + (buoy_pos(2) - y(k))^2);
     vec_to_buoy = buoy_pos - [x(k), y(k)];
     heading_vec = [cosd(heading(k)), sind(heading(k))];
-    % I don't think angle_diff is working as intended. 
-    % Is the equation correct?
-    %angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
-    %show_camera = (dist_to_buoy < 20) && (abs(angle_diff) < 60) && (depth(k) < 5);
+
     show_camera = (dist_to_buoy < 40) && (abs(theta_e) < 60) && (depth(k) < 5);
     if show_camera
         %cam_offset = dist_to_buoy * tand(-angle_diff);
@@ -197,10 +197,16 @@ for k = 1:N-2
         set(rect1, 'Position', [-0.75,0,1.5,3] + [cam_offset 0 0 0], 'Visible','on');
         set(rect2, 'Position', [-2,-1,4,1] + [cam_offset 0 0 0], 'Visible','on');
         set(artag2,   'XData', [-0.5 0.5] + cam_offset, 'Visible','on');
+        set(legL, 'Position', [-0.5, 0.0, 0.2, .8] + [cam_offset 0 0 0], 'Visible','on');
+        set(legR, 'Position', [0.325, 0.0, 0.2, .8] + [cam_offset 0 0 0], 'Visible','on');
+        set(topRect,'Position', [-0.6, .6, 1.2, 0.3] + [cam_offset 0 0 0], 'Visible','on');
     else
         set(rect1, 'Visible','off');
         set(rect2, 'Visible','off');
         set(artag2,   'Visible','off');
+        set(legL, 'Visible','off');
+        set(legR, 'Visible','off');
+        set(topRect, 'Visible','off');
     end
 
 
@@ -240,7 +246,7 @@ for k = 1:N-2
 
 
 %% Finish loop
-    phi = heading(k);
+
     drawnow;
     %pause(0.01);
 
@@ -248,11 +254,8 @@ end
 %% Part 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Unicycle Model kicks in
 dt = 0.01;
-% t = 0:dt:200;
-% N = length(t);
-% stride = 10;
+
 next_wp = buoy_pos;
-wp_i = 1;
 %making empty vectors
 heading_uni = zeros(2,1); x_uni = heading_uni; y_uni = heading_uni;
 x_d = heading_uni; y_d = heading_uni; x_e = heading_uni; y_e = heading_uni;
@@ -294,11 +297,6 @@ while dist_to_buoy > 2.5
     y_uni(2) = y_uni(1) + y_dot(2)*dt;
 
     % --- Waypoint Navigation ---
-    dx = next_wp(1) - x_uni(2);
-    dy = next_wp(2) - y_uni(2);
-    % if sqrt(dx^2 + dy^2) < 10 && wp_i < size(next_wp, 1)
-    %     wp_i = wp_i + 1;
-    % end
     x_d(2) = next_wp(1); y_d(2) = next_wp(2);
     x_e(2) = x_d(2) - x_uni(2); y_e(2) = y_d(2) - y_uni(2);
     heading_des = atan2d(y_e(2), x_e(2));
@@ -309,10 +307,6 @@ while dist_to_buoy > 2.5
 
 
     dist_to_buoy = sqrt((buoy_pos(1) - x_uni(2))^2 + (buoy_pos(2) - y_uni(2))^2);
-    % if dist_to_buoy < 0 % Not needed with the while loop
-    %     V = 0; break;
-    % end
-
     vec_to_buoy = buoy_pos - [x_uni(2), y_uni(2)];
     heading_vec = [90 - cosd(heading_uni(2)), 90 - sind(heading_uni(2))];
     angle_diff = acosd(dot(vec_to_buoy, heading_vec) / (norm(vec_to_buoy)*norm(heading_vec)));
@@ -328,15 +322,61 @@ while dist_to_buoy > 2.5
         set(rect1, 'Position', [-0.75,0,1.5,3] + [cam_offset 0 0 0], 'Visible','on');
         set(rect2, 'Position', [-2,-1,4,1] + [cam_offset 0 0 0], 'Visible','on');
         set(artag2,   'XData', [-0.5 0.5] + cam_offset, 'Visible','on');
+        set(legL, 'Position', [-0.5, 0.0, 0.2, .8] + [cam_offset 0 0 0], 'Visible','on');
+        set(legR, 'Position', [0.325, 0.0, 0.2, .8] + [cam_offset 0 0 0], 'Visible','on');
+        set(topRect,'Position', [-0.6, .6, 1.2, 0.3] + [cam_offset 0 0 0], 'Visible','on');
     else
         set(rect1, 'Visible','off');
         set(rect2, 'Visible','off');
         set(artag2,   'Visible','off');
+        set(legL, 'Visible','off');
+        set(legR, 'Visible','off');
+        set(topRect, 'Visible','off');
     end
-
+    
     %update vectors for next cycle
     x_uni(1) = x_uni(2); y_uni(1) = y_uni(2); 
     heading_uni(1) = heading_uni(2);
     u(1) = u(2);
 
+end
+    x = [0.7, 0.3, 0.4, 0.8, 0.9, 0.55, 1.0];
+y = [0.1, 0.3, 0.35, 0.5, 0.45, 0.3, 0.1];
+x2 = 2.2-[0.7, 0.3, 0.4, 0.8, 0.9, 0.55, 1.0];
+y2 = [0.1, 0.3, 0.35, 0.5, 0.45, 0.3, 0.1];
+
+
+hold on;
+arm1 = patch(x,y, 'b', 'LineWidth',4);
+arm2 = patch(x2,y2, 'b', 'LineWidth',4);
+
+%axis([0 2.2 0 1]);
+% Optional: push arms to back (but still before cleat legs)
+uistack(arm1,'down', 3);
+uistack(arm2,'down', 2);
+scale = 2.3;
+
+x_matrix(:,5) = [0.9; 1; 1.1; 1.2];
+x_matrix = scale*([
+    0.7,  0.35,  0.4,  0.8, 0.9, 0.55, 1.0;
+    0.71, 0.38, 0.47, 0.9, 0.95, 0.6,  0.99;
+    0.72, 0.45,  0.57,  1.0, 1.0, 0.68, 0.98;
+    0.73, 0.5, 0.61, 1.1, 1.0, 0.74,  0.97]-1.12);
+
+y_matrix = scale*2*([
+    0.1, 0.30, 0.35, 0.5, 0.45, 0.3, 0.1;
+    0.1, 0.32, 0.37, 0.45, 0.4, 0.31, 0.1;
+    0.1, 0.34, 0.38, 0.42, 0.35, 0.31, 0.1;
+    0.1, 0.36, 0.38, 0.37, 0.30, 0.3, 0.1]-.28);
+
+x2_matrix = (2.2 - x_matrix)-2.25;
+y2_matrix = y_matrix;
+for i=1:4
+        set(arm1, 'XData', x_matrix(i,:));
+        set(arm1, 'YData', y_matrix(i,:));
+        set(arm2, 'XData', x2_matrix(i,:));
+        set(arm2, 'YData', y2_matrix(i,:));
+        drawnow;
+        pause(1);
+        
 end
