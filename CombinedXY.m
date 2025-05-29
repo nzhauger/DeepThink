@@ -68,8 +68,8 @@ artag = imread('artag.png');
 artag2 = image(ax2, 'CData', flipud(artag), 'XData', ar_pos, 'YData', [1, 2]);
 
 % Buoy rectangles
-rect1 = rectangle(ax2, 'Position', [-0.75, 0, 1.5, 3] + offset_arr);
-rect2 = rectangle(ax2, 'Position', [-2, -1, 4, 1] + offset_arr);
+rect1 = rectangle(ax2, 'Position', [-0.75, 0, 1.5, 3] + offset_arr, 'FaceColor', [1, 0.6,0.2]);
+rect2 = rectangle(ax2, 'Position', [-2, -1, 4, 1] + offset_arr, 'FaceColor', [1, 0.6,0.2]);
 
 % Cleat left leg rectangle
 legL =rectangle('Position', [-0.25, 0.0, 0.1, 1.2], 'FaceColor', [0.8 0.8 0.8]);  
@@ -80,7 +80,7 @@ legR = rectangle('Position', [0.125, 0.0, 0.1, 1.2], 'FaceColor', [0.8 0.8 0.8])
 % Cleat top rectangle
 topRect = rectangle('Position', [-0.5, 1, 1, 0.4], 'FaceColor', 'k'); 
 
-uistack(topRect,'up', 1);
+uistack(artag2,'up', 1);
 set(rect1, 'Visible','off');
 set(rect2, 'Visible','off');
 set(legL, 'Visible','off');
